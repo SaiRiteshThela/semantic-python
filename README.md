@@ -2,179 +2,35 @@
 
 > Python, but `==` can understand meaning.
 
-Semantic Python is a backend-neutral semantic value layer for ordinary Python.
-It is not an inference model: OpenAI or Laya performs inference, while Semantic
-Python defines how a typed, uncertain model decision participates in Python
-control flow.
+Semantic Python is not a model like Laya or Jev. It is an opt-in Python value
+layer that turns backend inference into inspectable decisions for normal Python
+control flow. Only `Semantic(...)` values can invoke a model.
 
-Only values explicitly wrapped in `Semantic` cross that boundary. Every other
-Python value keeps its standard behavior.
-
-```python
-from semantic_python import OpenAIBackend, Semantic, configure
-
-configure(backend=OpenAIBackend(model="gpt-6-luna"))
-
-message = Semantic("I'm done")
-if message == "the user wants to stop":
-    print("Stop requested")
-```
-
-The comparison returns an inspectable `Decision` containing the Boolean result,
-probability, backend, model, proposition, and a digest of the input state.
-
-> [!WARNING]
-> Semantic Python is experimental and pre-alpha. Model decisions are estimates,
-> not facts or authorization for consequential actions. The example above
-> requires the `openai` extra and sends the wrapped text to OpenAI.
-
-## What Semantic Python adds
-
-Model providers expose inference APIs. Semantic Python provides the language
-boundary and runtime semantics around those APIs:
-
-| Model backend | Semantic Python |
-| --- | --- |
-| Produces an inference result. | Exposes the result as a typed `Decision`. |
-| Defines provider-specific request and response formats. | Gives backends one shared decision protocol. |
-| May return an uncertain classification. | Applies explicit truth and uncertainty policies. |
-| Does not control Python operators. | Makes `Semantic[str] == proposition` usable in normal Python. |
-| Usually treats calls independently. | Provides stable caching, provenance, recording, and replay. |
-
-Laya and OpenAI are supported inference backends. Jev and other providers are
-not bundled in v0.1; adding a backend must not change the public control-flow
-semantics.
-
-## Installation
-
-```bash
-python -m pip install semantic-python
-```
-
-The distribution name is `semantic-python`; the import package is
-`semantic_python`.
-
-## Python control flow with semantic values
-
-Backend selection is separate from application logic. Once configured,
-semantic decisions work with functions, `if`, `for`, `while`, comprehensions,
-exceptions, and asynchronous applications without new Python syntax.
-
-### Functions, `if`, and `for`
-
-```python
-from semantic_python import Decision, Semantic, UncertainDecisionError
-
-STOP_REQUEST = "the user wants to stop"
-
-
-def classify_stop(text: str) -> Decision[bool]:
-    return Semantic(text) == STOP_REQUEST
-
-
-messages = [
-    "Continue with the next ticket.",
-    "Finish the current item, then close the session.",
-]
-
-for text in messages:
-    try:
-        decision = classify_stop(text)
-        print(decision.value, decision.probability, decision.model)
-        if decision:
-            break
-    except UncertainDecisionError as error:
-        print("Review required:", error.decision.probability)
-
-decision_map = {text: classify_stop(text) for text in messages}
-confident = [text for text, decision in decision_map.items() if decision.probability >= 0.85]
-```
-
-The function returns the complete decision rather than discarding probability
-and provenance. Each unique comparison can invoke the selected backend.
-
-### `while`, `!=`, and caching
-
-```python
-queue = iter(["Keep going", "Not yet", "That is enough for today"])
-message = Semantic(next(queue))
-
-while message != STOP_REQUEST:
-    print("Processing:", message.value)
-    message = Semantic(next(queue))
-```
-
-`!=` negates the same underlying judgment used by `==`; it does not issue a
-separate reworded inference. Repeating an identical comparison uses the
-decision cache by default.
-
-### Async applications
-
-The v0.1 backend protocol is synchronous. Move a semantic comparison to a
-worker thread when calling it from an event loop:
-
-```python
-import asyncio
-
-
-async def classify_stop_async(text: str) -> Decision[bool]:
-    return await asyncio.to_thread(lambda: Semantic(text) == STOP_REQUEST)
-
-
-async def handle_message(text: str) -> None:
-    decision = await classify_stop_async(text)
-    if decision:
-        print("Stop requested")
-
-
-asyncio.run(handle_message("Please save everything and close the session."))
-```
-
-This preserves normal `async`/`await` behavior while preventing synchronous
-inference from blocking the event loop.
-
-## Backend-independent testing
-
-The same application semantics can be tested with deterministic decisions and
-no model, API key, network access, latency, or cost:
-
-```python
-from semantic_python import FakeBackend, Semantic, configure
-
-PROPOSITION = "the user wants to stop"
-
-backend = FakeBackend(
-    {
-        ("I'm done", PROPOSITION): (True, 0.98),
-        ("Keep going", PROPOSITION): (False, 0.03),
-    }
-)
-configure(backend=backend, threshold=0.85)
-
-message = Semantic("I'm done")
-decision = message == PROPOSITION
-
-print(decision.value)  # True
-print(decision.probability)  # 0.98
-print(decision.backend)  # fake
-
-if decision:
-    print("Stopping")
-```
-
-## OpenAI backend
-
-Install the optional dependency and provide the key through the environment:
+## Install
 
 ```bash
 python -m pip install 'semantic-python[openai]'
 export OPENAI_API_KEY="..."
 ```
 
-Select OpenAI explicitly:
+## Demo
+
+Use natural-language intent in ordinary loops and async code:
+
+`functions` · `if` · `try/except` · `for` · `while` · `comprehensions` ·
+`generators` · `classes` · `with` · `async/await`
 
 ```python
-from semantic_python import OpenAIBackend, Semantic, configure
+import asyncio
+
+from semantic_python import (
+    OpenAIBackend,
+    Semantic,
+    UncertainDecisionError,
+    configure,
+)
+
+STOP = "the user wants to stop"
 
 configure(
     backend=OpenAIBackend(model="gpt-6-luna"),
@@ -183,149 +39,154 @@ configure(
     uncertainty="raise",
 )
 
-message = Semantic("Please save my work and close this session.")
-decision = message == "the user wants to stop"
 
-print(
-    decision.value,
-    decision.probability,
-    decision.backend,
-    decision.model,
-)
+def decide(text: str):
+    return Semantic(text) == STOP
+
+
+messages = [
+    "Continue with the next ticket.",
+    "Save the work and close this session.",
+]
+
+for text in messages:
+    decision = decide(text)
+    print(f"stop={decision.value} p={decision.probability:.2f} model={decision.model}")
+
+    try:
+        if decision:
+            print("Stop requested")
+            break
+    except UncertainDecisionError:
+        print("Send to human review")
+
+
+async def decide_async(text: str):
+    return await asyncio.to_thread(decide, text)
+
+
+async_result = asyncio.run(decide_async(text))
+opposite = Semantic(text) != STOP
+
+print("async cache hit:", async_result.cached)
+print("negated:", opposite.value, opposite.probability)
 ```
 
-This comparison sends the wrapped state and proposition to OpenAI and may incur
-latency and API cost. The probability is model-reported and is not independently
-calibrated by this package.
+The comparison returns a bool-coercible `Decision`, so `if` and loops work
+normally while probability, model provenance, caching, and replay remain
+available. `!=` negates the same judgment instead of issuing a second inference.
 
-## Laya backend
+## More Python patterns
 
-Laya is the primary local backend:
+These examples continue with the configured backend and `STOP` proposition from
+the main demo.
 
-```bash
-python -m pip install 'semantic-python[laya]'
-```
+### `while`
 
 ```python
-from semantic_python import LayaBackend, Semantic, configure
+queue = iter(["Keep going", "Not yet", "Finished for today"])
+message = Semantic(next(queue))
 
-configure(backend=LayaBackend(), threshold=0.85)
-decision = Semantic("I'm finished for today") == "the user wants to stop"
-
-print(decision.value, decision.probability, decision.model)
+while message != STOP:
+    print("Processing:", message.value)
+    message = Semantic(next(queue))
 ```
 
-The first prediction may download model checkpoints. Review the
-[Laya verification record](docs/laya-verification.md) before deployment.
+### Comprehensions and generators
 
-## Comparison semantics
+```python
+texts = ["Continue", "Pause here", "That is all for today"]
+decisions = {text: decide(text) for text in texts}
 
-| Expression | Behavior |
+stop_requests = [text for text, decision in decisions.items() if decision.value]
+
+probabilities = (decision.probability for decision in decisions.values())
+print(stop_requests, list(probabilities))
+```
+
+### Classes
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class IntentRule:
+    proposition: str
+
+    def evaluate(self, text: str):
+        return Semantic(text) == self.proposition
+
+
+stop_rule = IntentRule("the user wants to stop")
+decision = stop_rule.evaluate("Please close the session")
+print(decision.value, decision.probability)
+```
+
+### Context managers and offline tests
+
+```python
+from semantic_python import FakeBackend, configuration
+
+state = "I'm done"
+fixtures = {(state, STOP): (True, 0.99)}
+
+with configuration(backend=FakeBackend(fixtures), cache=False):
+    assert Semantic(state) == STOP
+```
+
+## Backends
+
+Application code stays the same when the configured backend changes.
+
+| Backend | Install | Purpose |
+| --- | --- | --- |
+| `OpenAIBackend` | `semantic-python[openai]` | Hosted inference |
+| `LayaBackend` | `semantic-python[laya]` | Local inference |
+| `FakeBackend` | Included | Deterministic offline tests |
+
+OpenAI receives the wrapped state and proposition. Laya may download model
+checkpoints on first use. FakeBackend performs no network requests.
+
+## Semantics
+
+| Expression | Result |
 | --- | --- |
-| `"done" == "stop"` | Normal Python equality; never invokes a model. |
-| `Semantic(text) == proposition` | Produces a semantic `Decision`. |
-| `Semantic(text) != proposition` | Negates the same cached judgment. |
-| `semantic is other` | Normal Python identity. |
-| `Semantic(...) == Semantic(...)` | Rejected as ambiguous. |
-| `Semantic(...) == non_string` | Rejected. |
-| `hash(Semantic(...))` | Rejected; hashing never invokes inference. |
+| `plain_string == other` | Ordinary Python equality |
+| `Semantic(text) == proposition` | Inspectable semantic `Decision` |
+| `Semantic(text) != proposition` | Negated cached judgment |
+| `semantic is other` | Ordinary Python identity |
+| `Semantic(...) == Semantic(...)` | Rejected as ambiguous |
+| `hash(Semantic(...))` | Rejected; inference is never used for hashing |
 
-The default truth policy accepts probabilities at or above `0.85`, rejects
-probabilities at or below `0.15`, and raises `UncertainDecisionError` between
-those bounds.
-
-Backend failures are raised explicitly rather than silently converted to
-`False`.
-
-## Why return a `Decision`?
-
-A model judgment should not lose its uncertainty or origin when used in control
-flow. A decision preserves:
-
-- `value`: the backend's Boolean classification;
-- `probability`: `P(proposition=true)`;
-- `backend` and `model`: inference provenance;
-- `proposition`: the question evaluated;
-- `state_hash`: a non-plaintext identifier for the wrapped state;
-- `cached`: whether the result came from the decision cache;
-- backend-specific metadata.
-
-`Decision` is bool-coercible, so it works with ordinary `if` and `while`
-statements while remaining available for inspection.
+Probabilities at or above `0.85` resolve true, probabilities at or below `0.15`
+resolve false, and the default policy raises `UncertainDecisionError` between
+those thresholds. Backend failures are raised rather than converted to `False`.
 
 ## Examples
 
-- [`stop_loop.py`](examples/stop_loop.py) — semantic control flow;
-- [`ticket_routing.py`](examples/ticket_routing.py) — deterministic routing;
-- [`escalation.py`](examples/escalation.py) — uncertainty and human review;
-- [`semantic_python_demo.ipynb`](examples/semantic_python_demo.ipynb) — focused
-  OpenAI demonstration;
-- [`python_primitives_demo.ipynb`](examples/python_primitives_demo.ipynb) —
-  Python language features with an OpenAI-backed workflow.
+- [OpenAI demo](examples/semantic_python_demo.ipynb)
+- [Python control-flow demo](examples/python_primitives_demo.ipynb)
+- [Stop loop](examples/stop_loop.py)
+- [Ticket routing](examples/ticket_routing.py)
+- [Uncertainty and escalation](examples/escalation.py)
 
-Run the offline examples from the repository root:
+The offline examples run without credentials:
 
 ```bash
+python -m pip install -e .
 python examples/stop_loop.py
 python examples/ticket_routing.py
 python examples/escalation.py
 ```
 
-## VS Code notebooks
+## Safety
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[openai,notebook]'
-python -m ipykernel install --user --name sempy --display-name "Python (sempy)"
-```
-
-Open a notebook and select `Python (sempy)` from **Select Kernel**. The notebooks
-request `OPENAI_API_KEY` through `getpass` when it is not already available in
-the environment.
-
-## Safety and privacy
-
-- Hosted backends transmit the wrapped state and proposition to their provider.
-- Local backends may download checkpoints and load substantial dependencies.
-- Model outputs can be wrong, biased, nondeterministic, or poorly calibrated.
-- A state digest reduces plaintext exposure but does not anonymize predictable
-  input.
+- Model probability is an estimate, not truth or authorization.
+- Hosted inference can transmit sensitive text and incur cost.
 - Consequential actions should use conservative thresholds and human review.
-- API keys belong in environment variables or a secrets manager, never source
-  files or notebooks.
 
-See [Backends and data egress](docs/backends.md) and
-[Uncertainty and safe decisions](docs/uncertainty.md) for the complete model.
+See [semantics](docs/semantics.md), [backends](docs/backends.md), and
+[uncertainty](docs/uncertainty.md) for the complete behavior.
 
-## Development
-
-```bash
-git clone git@github.com:SaiRiteshThela/semantic-python.git
-cd semantic-python
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[dev]'
-
-pytest --cov=semantic_python --cov-report=term-missing
-ruff check .
-ruff format --check .
-mypy
-```
-
-The offline test suite does not require model downloads, network access, or API
-keys. Live backend tests are opt-in.
-
-## Documentation
-
-- [Design](docs/design.md)
-- [Comparison semantics](docs/semantics.md)
-- [Backends and data egress](docs/backends.md)
-- [Laya verification](docs/laya-verification.md)
-- [Uncertainty](docs/uncertainty.md)
-- [Roadmap and limitations](docs/roadmap.md)
-- [Benchmark harness](benchmarks/README.md)
-
-## License
-
-Semantic Python is available under the [MIT License](LICENSE).
+MIT licensed. Experimental and pre-alpha.
