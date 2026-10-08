@@ -1,5 +1,9 @@
 # Semantic Python
 
+[![PyPI](https://img.shields.io/pypi/v/semantic-python.svg)](https://pypi.org/project/semantic-python/)
+[![Python](https://img.shields.io/pypi/pyversions/semantic-python.svg)](https://pypi.org/project/semantic-python/)
+[![CI](https://github.com/SaiRiteshThela/semantic-python/actions/workflows/ci.yml/badge.svg)](https://github.com/SaiRiteshThela/semantic-python/actions/workflows/ci.yml)
+
 > Python, but `==` can understand meaning.
 
 Semantic Python is not a model like Laya or Jev. It is an opt-in Python value
