@@ -2,18 +2,21 @@
 
 > Python, but `==` can understand meaning.
 
-Semantic Python adds opt-in, model-backed semantic values to ordinary Python.
-Only values explicitly wrapped in `Semantic` can invoke a model; every other
+Semantic Python is a backend-neutral semantic value layer for ordinary Python.
+It is not an inference model: OpenAI or Laya performs inference, while Semantic
+Python defines how a typed, uncertain model decision participates in Python
+control flow.
+
+Only values explicitly wrapped in `Semantic` cross that boundary. Every other
 Python value keeps its standard behavior.
 
 ```python
-from semantic_python import FakeBackend, Semantic, configure
+from semantic_python import OpenAIBackend, Semantic, configure
 
-proposition = "the user wants to stop"
-configure(backend=FakeBackend({("I'm done", proposition): (True, 0.98)}))
+configure(backend=OpenAIBackend(model="gpt-6-luna"))
 
 message = Semantic("I'm done")
-if message == proposition:
+if message == "the user wants to stop":
     print("Stop requested")
 ```
 
@@ -22,7 +25,25 @@ probability, backend, model, proposition, and a digest of the input state.
 
 > [!WARNING]
 > Semantic Python is experimental and pre-alpha. Model decisions are estimates,
-> not facts or authorization for consequential actions.
+> not facts or authorization for consequential actions. The example above
+> requires the `openai` extra and sends the wrapped text to OpenAI.
+
+## What Semantic Python adds
+
+Model providers expose inference APIs. Semantic Python provides the language
+boundary and runtime semantics around those APIs:
+
+| Model backend | Semantic Python |
+| --- | --- |
+| Produces an inference result. | Exposes the result as a typed `Decision`. |
+| Defines provider-specific request and response formats. | Gives backends one shared decision protocol. |
+| May return an uncertain classification. | Applies explicit truth and uncertainty policies. |
+| Does not control Python operators. | Makes `Semantic[str] == proposition` usable in normal Python. |
+| Usually treats calls independently. | Provides stable caching, provenance, recording, and replay. |
+
+Laya and OpenAI are supported inference backends. Jev and other providers are
+not bundled in v0.1; adding a backend must not change the public control-flow
+semantics.
 
 ## Installation
 
@@ -33,10 +54,89 @@ python -m pip install semantic-python
 The distribution name is `semantic-python`; the import package is
 `semantic_python`.
 
-## Deterministic quickstart
+## Python control flow with semantic values
 
-The fake backend provides a complete offline example with no API key or network
-access:
+Backend selection is separate from application logic. Once configured,
+semantic decisions work with functions, `if`, `for`, `while`, comprehensions,
+exceptions, and asynchronous applications without new Python syntax.
+
+### Functions, `if`, and `for`
+
+```python
+from semantic_python import Decision, Semantic, UncertainDecisionError
+
+STOP_REQUEST = "the user wants to stop"
+
+
+def classify_stop(text: str) -> Decision[bool]:
+    return Semantic(text) == STOP_REQUEST
+
+
+messages = [
+    "Continue with the next ticket.",
+    "Finish the current item, then close the session.",
+]
+
+for text in messages:
+    try:
+        decision = classify_stop(text)
+        print(decision.value, decision.probability, decision.model)
+        if decision:
+            break
+    except UncertainDecisionError as error:
+        print("Review required:", error.decision.probability)
+
+decision_map = {text: classify_stop(text) for text in messages}
+confident = [text for text, decision in decision_map.items() if decision.probability >= 0.85]
+```
+
+The function returns the complete decision rather than discarding probability
+and provenance. Each unique comparison can invoke the selected backend.
+
+### `while`, `!=`, and caching
+
+```python
+queue = iter(["Keep going", "Not yet", "That is enough for today"])
+message = Semantic(next(queue))
+
+while message != STOP_REQUEST:
+    print("Processing:", message.value)
+    message = Semantic(next(queue))
+```
+
+`!=` negates the same underlying judgment used by `==`; it does not issue a
+separate reworded inference. Repeating an identical comparison uses the
+decision cache by default.
+
+### Async applications
+
+The v0.1 backend protocol is synchronous. Move a semantic comparison to a
+worker thread when calling it from an event loop:
+
+```python
+import asyncio
+
+
+async def classify_stop_async(text: str) -> Decision[bool]:
+    return await asyncio.to_thread(lambda: Semantic(text) == STOP_REQUEST)
+
+
+async def handle_message(text: str) -> None:
+    decision = await classify_stop_async(text)
+    if decision:
+        print("Stop requested")
+
+
+asyncio.run(handle_message("Please save everything and close the session."))
+```
+
+This preserves normal `async`/`await` behavior while preventing synchronous
+inference from blocking the event loop.
+
+## Backend-independent testing
+
+The same application semantics can be tested with deterministic decisions and
+no model, API key, network access, latency, or cost:
 
 ```python
 from semantic_python import FakeBackend, Semantic, configure
