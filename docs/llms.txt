@@ -1,0 +1,20 @@
+# Semantic Python
+
+> Semantic Python is an experimental, opt-in Python value layer for inspectable model-backed decisions. Ordinary Python remains deterministic.
+
+Semantic Python is not a decision model. It supplies a standard-Python semantic boundary, Boolean decision policy, provenance, caching, and offline replay around configurable backends. The current real backends are Laya for local inference and OpenAI for hosted inference. FakeBackend provides deterministic offline tests. Jev integration is roadmap research and is not currently implemented.
+
+## Primary pages
+
+- [Overview](https://sairiteshthela.github.io/semantic-python/): Product definition and minimal example.
+- [Jev vs Laya vs JevLang vs Semantic Python](https://sairiteshthela.github.io/semantic-python/comparisons/jev-laya-semantic-python/): Evidence-based comparison of the model and programming layers.
+- [GitHub repository](https://github.com/SaiRiteshThela/semantic-python): Source, tests, examples, and design documentation.
+- [PyPI package](https://pypi.org/project/semantic-python/): Published Python distribution.
+
+## Core semantics
+
+- Plain Python values never invoke a model.
+- `Semantic(text) == proposition` returns an inspectable, bool-coercible Decision.
+- `Semantic(text) != proposition` negates the same judgment without independent inference.
+- Model probability is an estimate, not truth or authorization.
+- The v0.1 equality MVP supports Boolean propositions; choice and score remain future protocol shapes.

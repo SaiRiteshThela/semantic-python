@@ -10,7 +10,15 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Sai Ritesh Thela" }]
-keywords = ["semantic", "python", "decision-models", "ai"]
+keywords = [
+  "semantic-python",
+  "semantic-programming",
+  "typed-decisions",
+  "decision-models",
+  "jev",
+  "laya",
+  "openai",
+]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "License :: OSI Approved :: MIT License",
@@ -25,6 +33,7 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/SaiRiteshThela/semantic-python"
+Documentation = "https://sairiteshthela.github.io/semantic-python/"
 Repository = "https://github.com/SaiRiteshThela/semantic-python"
 Issues = "https://github.com/SaiRiteshThela/semantic-python/issues"
 Changelog = "https://github.com/SaiRiteshThela/semantic-python/blob/main/CHANGELOG.md"

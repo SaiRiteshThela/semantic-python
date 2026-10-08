@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jev vs Laya vs JevLang vs Semantic Python</title>
+    <meta name="description" content="An evidence-based comparison of Jev, Laya, JevLang, and Semantic Python: models, syntax, hosting, decisions, uncertainty, privacy, testing, caching, and use cases.">
+    <meta name="keywords" content="Jev alternative, Laya Python, Jev vs Laya, JevLang, semantic Python, semantic if, typed decisions, decision models">
+    <meta property="og:title" content="Jev vs Laya vs JevLang vs Semantic Python">
+    <meta property="og:description" content="Models, language layers, syntax, backends, uncertainty, privacy, and testing—compared without conflating them.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sairiteshthela.github.io/semantic-python/comparisons/jev-laya-semantic-python/">
+    <meta property="og:image" content="https://sairiteshthela.github.io/semantic-python/assets/social-preview.png">
+    <link rel="canonical" href="https://sairiteshthela.github.io/semantic-python/comparisons/jev-laya-semantic-python/">
+    <link rel="stylesheet" href="../../assets/site.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Jev vs Laya vs JevLang vs Semantic Python",
+        "description": "An evidence-based comparison of typed decision models and Python integration layers.",
+        "datePublished": "2026-10-07",
+        "dateModified": "2026-10-07",
+        "author": {"@type": "Person", "name": "Sai Ritesh Thela"},
+        "mainEntityOfPage": "https://sairiteshthela.github.io/semantic-python/comparisons/jev-laya-semantic-python/"
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <nav class="wrap" aria-label="Primary navigation">
+        <a class="brand" href="../../">Semantic Python</a>
+        <div class="nav-links">
+          <a href="#comparison">Comparison</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/SaiRiteshThela/semantic-python">GitHub</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero wrap">
+        <p class="eyebrow">Decision models and Python integration</p>
+        <h1>Jev vs Laya vs JevLang vs Semantic Python</h1>
+        <p class="lede">
+          These projects overlap around typed, probabilistic decisions, but they
+          are not interchangeable. Jev and Laya are decision engines. JevLang and
+          Semantic Python are programming interfaces with different syntax,
+          backend, testing, and runtime choices.
+        </p>
+        <div class="actions">
+          <a class="button" href="#comparison">See every difference</a>
+          <a class="button secondary" href="https://pypi.org/project/semantic-python/">Semantic Python on PyPI</a>
+        </div>
+      </section>
+
+      <section class="wrap" aria-labelledby="short-answer">
+        <h2 id="short-answer">The short answer</h2>
+        <div class="grid">
+          <article class="card">
+            <p class="label">Hosted model and API</p>
+            <h3>Jev</h3>
+            <p>TypeSafe's System One model accepts state plus typed questions and returns probabilistic, structured decisions through a hosted API.</p>
+          </article>
+          <article class="card">
+            <p class="label">Open-weights decision engine</p>
+            <h3>Laya</h3>
+            <p>A local decision engine for <code>choice</code>, <code>score</code>, and yes/no <code>noul</code> questions, with Python, CLI, and service interfaces.</p>
+          </article>
+          <article class="card">
+            <p class="label">Python value layer</p>
+            <h3>Semantic Python</h3>
+            <p>A standard-Python library that makes selected values semantic and preserves each Boolean judgment as an inspectable <code>Decision</code>.</p>
+          </article>
+        </div>
+        <p class="note">
+          JevLang is a fourth piece: a Python source extension that introduces
+          <code>~</code> and <code>jev/case</code> syntax and rewrites <code>.jev</code>
+          files to calls against Jev. It is included below because it is the closest
+          syntax-level comparison to Semantic Python.
+        </p>
+      </section>
+
+      <section class="wrap" id="comparison" aria-labelledby="comparison-title">
+        <h2 id="comparison-title">Complete comparison</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>Jev</th>
+                <th>Laya</th>
+                <th>JevLang</th>
+                <th>Semantic Python</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>What it is</td>
+                <td>A hosted System One decision model and HTTP API from TypeSafe.</td>
+                <td>An open-weights, non-autoregressive decision engine.</td>
+                <td>A Python source extension and client layer built around Jev.</td>
+                <td>An opt-in Python value and decision layer.</td>
+              </tr>
+              <tr>
+                <td>Primary job</td>
+                <td>Answer typed questions about supplied state.</td>
+                <td>Run typed decisions on local or self-hosted model checkpoints.</td>
+                <td>Express Jev-backed questions and branches with compact syntax.</td>
+                <td>Use semantic judgments inside ordinary Python control flow while retaining metadata.</td>
+              </tr>
+              <tr>
+                <td>Primary abstraction</td>
+                <td>State plus a collection of typed questions.</td>
+                <td>State plus <code>choice</code>, <code>score</code>, or <code>noul</code> questions.</td>
+                <td><code>x ~ question</code> and <code>jev/case</code> blocks.</td>
+                <td><code>Semantic(value)</code> compared with a proposition.</td>
+              </tr>
+              <tr>
+                <td>Syntax</td>
+                <td>HTTP/JSON API.</td>
+                <td>Python API, CLI, HTTP service, and related SDKs.</td>
+                <td>Python-derived syntax that is rewritten before execution.</td>
+                <td>Valid, unmodified Python syntax.</td>
+              </tr>
+              <tr>
+                <td>Source files</td>
+                <td>Language-independent API.</td>
+                <td>Ordinary client code.</td>
+                <td>Uses <code>.jev</code> modules and an import hook.</td>
+                <td>Uses ordinary <code>.py</code> modules; no compiler or import hook.</td>
+              </tr>
+              <tr>
+                <td>Semantic boundary</td>
+                <td>The explicit API request.</td>
+                <td>The explicit prediction call.</td>
+                <td>The <code>~</code> expression or <code>jev</code> block.</td>
+                <td>Only an explicitly wrapped <code>Semantic(...)</code> value.</td>
+              </tr>
+              <tr>
+                <td>Inference provider</td>
+                <td>TypeSafe's Jev service.</td>
+                <td>Laya checkpoints selected directly or through its router.</td>
+                <td>TypeSafe Jev.</td>
+                <td>Selectable: Laya, OpenAI, or deterministic <code>FakeBackend</code>.</td>
+              </tr>
+              <tr>
+                <td>Execution location</td>
+                <td>Hosted.</td>
+                <td>Local or self-hosted.</td>
+                <td>Hosted inference through Jev.</td>
+                <td>Local, hosted, or offline depending on the configured backend.</td>
+              </tr>
+              <tr>
+                <td>Current decision types</td>
+                <td>Yes/no, choice, and rating questions through the System One API.</td>
+                <td><code>noul</code>, <code>choice</code>, and <code>score</code>.</td>
+                <td>Yes/no probability, scale, and choice.</td>
+                <td>Boolean proposition evaluation for the v0.1 equality MVP; choice and score remain forward-compatible protocol shapes.</td>
+              </tr>
+              <tr>
+                <td>Return shape</td>
+                <td>Typed answers plus model and usage information.</td>
+                <td>Typed answers, probabilities/confidence, usage, and optional routing metadata.</td>
+                <td>Number- and string-like results carrying additional probability metadata.</td>
+                <td>A bool-coercible <code>Decision</code> retaining value, probability, backend, model, proposition, state digest, and provenance.</td>
+              </tr>
+              <tr>
+                <td>Branching</td>
+                <td>The caller interprets returned values.</td>
+                <td>The caller interprets returned values.</td>
+                <td>Direct <code>if x ~ ...</code> and <code>jev/case</code> constructs.</td>
+                <td>Ordinary <code>if</code> and <code>while</code> consume a <code>Decision</code>.</td>
+              </tr>
+              <tr>
+                <td>Default Boolean policy</td>
+                <td>Caller-defined from returned probabilities.</td>
+                <td>Caller-defined; Laya also exposes confidence-gating options.</td>
+                <td>A yes/no probability is truthy at its documented default threshold.</td>
+                <td>True at or above 0.85, false at or below 0.15, otherwise raise by default.</td>
+              </tr>
+              <tr>
+                <td>Uncertainty</td>
+                <td>Probabilities and confidence are returned for application policy.</td>
+                <td>Probabilities/confidence are returned; low-confidence results can be marked.</td>
+                <td>Probability and confidence are available for explicit guards.</td>
+                <td>An uncertainty band is part of configuration; ambiguous truth testing raises unless another policy is explicitly selected.</td>
+              </tr>
+              <tr>
+                <td>Negation behavior</td>
+                <td>Expressed in the question or caller logic.</td>
+                <td>Expressed in the question or caller logic.</td>
+                <td>A separate source expression can issue another query.</td>
+                <td><code>!=</code> negates the same cached judgment instead of rewording and reinferring.</td>
+              </tr>
+              <tr>
+                <td>Caching</td>
+                <td>Not a language-layer feature; callers manage it.</td>
+                <td>Lifecycle and prediction hooks exist; application policy remains explicit.</td>
+                <td>No caching layer of its own is documented.</td>
+                <td>Stable decision caching is built in and preserves metadata.</td>
+              </tr>
+              <tr>
+                <td>Replay</td>
+                <td>Caller responsibility.</td>
+                <td>Caller responsibility or integration-level tooling.</td>
+                <td>Offline stubs support syntax and workflow tests, not model replay.</td>
+                <td>Offline record/replay primitives preserve decision provenance without plaintext state.</td>
+              </tr>
+              <tr>
+                <td>Offline tests</td>
+                <td>Require application fixtures or mocks.</td>
+                <td>Can run locally after model setup; deterministic application tests still need fixtures.</td>
+                <td>Includes a substring-based fake mode for tests without a key.</td>
+                <td><code>FakeBackend</code> provides exact deterministic fixtures with no network or model download.</td>
+              </tr>
+              <tr>
+                <td>Network and data</td>
+                <td>State is sent to a hosted API.</td>
+                <td>Inference can remain local, but first use may download checkpoints.</td>
+                <td>The value on the left of <code>~</code> is sent to Jev.</td>
+                <td>No transfer on import or wrapping. A comparison follows the selected backend: Laya local, OpenAI remote, fake offline.</td>
+              </tr>
+              <tr>
+                <td>Install</td>
+                <td>Use the hosted API and credentials.</td>
+                <td><code>pip install laya</code></td>
+                <td><code>pip install jevlang</code></td>
+                <td><code>pip install semantic-python</code>, with optional <code>[laya]</code> or <code>[openai]</code>.</td>
+              </tr>
+              <tr>
+                <td>Language change</td>
+                <td>None; it is an API.</td>
+                <td>None; it is an engine/API.</td>
+                <td>Adds new source forms and a <code>.jev</code> toolchain.</td>
+                <td>None; operator behavior changes only on the explicit wrapper type.</td>
+              </tr>
+              <tr>
+                <td>Best fit</td>
+                <td>Hosted, typed probabilistic decisions through a direct service API.</td>
+                <td>Local or self-hosted typed decision inference.</td>
+                <td>Teams that want dedicated semantic syntax backed specifically by Jev.</td>
+                <td>Teams that want valid Python syntax, backend choice, inspectable Boolean decisions, and deterministic application tests.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="wrap" aria-labelledby="example-title">
+        <h2 id="example-title">Using Laya through Semantic Python</h2>
+        <p>
+          Laya supplies local inference; Semantic Python supplies the value boundary,
+          Python operator behavior, decision policy, caching, provenance, and replay.
+        </p>
+        <pre><code>python -m pip install "semantic-python[laya]"</code></pre>
+        <pre><code>from semantic_python import LayaBackend, Semantic, configure
+
+configure(
+    backend=LayaBackend(),
+    true_threshold=0.85,
+    false_threshold=0.15,
+    uncertainty="raise",
+)
+
+ticket = Semantic("I was charged twice and need a refund")
+decision = ticket == "the customer has a billing problem"
+
+if decision:
+    route_to_billing()
+
+print(decision.probability, decision.backend, decision.model)</code></pre>
+        <p class="note">
+          The first Laya prediction may download a checkpoint and initialize a
+          substantial local model stack. Validate quality, latency, memory, and
+          negation behavior on representative data before production use.
+        </p>
+      </section>
+
+      <section class="wrap" aria-labelledby="choice-title">
+        <h2 id="choice-title">Which should you choose?</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Choose Jev when</h3>
+            <p>You want TypeSafe's hosted System One model and will build directly against its typed HTTP API.</p>
+          </article>
+          <article class="card">
+            <h3>Choose Laya when</h3>
+            <p>You want an open-weights decision engine on local or self-hosted infrastructure and are comfortable managing its model runtime.</p>
+          </article>
+          <article class="card">
+            <h3>Choose Semantic Python when</h3>
+            <p>You want explicit semantic values in standard Python, backend choice, inspectable uncertainty, caching, replay, and deterministic offline application tests.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="wrap faq" id="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Frequently asked questions</h2>
+        <details>
+          <summary>Is Semantic Python a Jev replacement?</summary>
+          <p>No. Jev is a model/API; Semantic Python is a Python value layer. A future Jev adapter is roadmap research, not a current integration.</p>
+        </details>
+        <details>
+          <summary>Does Semantic Python replace Laya?</summary>
+          <p>No. Laya can provide the inference behind Semantic Python. The two projects operate at different layers and can be used together.</p>
+        </details>
+        <details>
+          <summary>What is the closest JevLang equivalent?</summary>
+          <p><code>x ~ "question"</code> in JevLang is closest in intent to <code>Semantic(x) == "proposition"</code>, but Semantic Python uses ordinary <code>.py</code> syntax, an explicit wrapper, and a backend-neutral decision protocol.</p>
+        </details>
+        <details>
+          <summary>Does Semantic Python change normal string equality?</summary>
+          <p>No. <code>"done" == "the user wants to stop"</code> remains ordinary deterministic Python. Only <code>Semantic("done")</code> crosses the model-backed boundary.</p>
+        </details>
+        <details>
+          <summary>Can Semantic Python work without a network?</summary>
+          <p>Yes. <code>FakeBackend</code> is entirely offline, and Laya inference can run locally after its model artifacts are available. The OpenAI backend sends the complete wrapped state and proposition to a hosted service.</p>
+        </details>
+        <details>
+          <summary>Are model probabilities facts?</summary>
+          <p>No. They are estimates that require evaluation on the intended domain. Consequential actions need conservative thresholds and an explicit review or fallback path.</p>
+        </details>
+      </section>
+
+      <section class="wrap" aria-labelledby="sources-title">
+        <h2 id="sources-title">Primary sources and scope</h2>
+        <ul>
+          <li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">TypeSafe: Introducing System One Models and Jev</a></li>
+          <li><a href="https://api.typesafe.ai/redoc">TypeSafe System One API reference</a></li>
+          <li><a href="https://github.com/NandhaKishorM/laya">Laya source and documentation</a></li>
+          <li><a href="https://github.com/sumanmichael/jevlang">JevLang source and documentation</a></li>
+          <li><a href="https://github.com/SaiRiteshThela/semantic-python">Semantic Python source and documentation</a></li>
+        </ul>
+        <p class="note">
+          Comparison checked on October 7, 2026. Product APIs and model behavior
+          can change. Vendor performance and calibration claims are not reproduced
+          here as independent benchmark results.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        Semantic Python is experimental software. This page distinguishes related
+        projects; it does not claim affiliation with TypeSafe, Jev, Laya, or JevLang.
+      </div>
+    </footer>
+  </body>
+</html>

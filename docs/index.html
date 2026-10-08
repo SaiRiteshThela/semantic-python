@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Semantic Python — inspectable semantic decisions in ordinary Python</title>
+    <meta name="description" content="Semantic Python is an opt-in Python value layer for inspectable model-backed decisions with ordinary Python syntax.">
+    <link rel="canonical" href="https://sairiteshthela.github.io/semantic-python/">
+    <link rel="stylesheet" href="./assets/site.css">
+  </head>
+  <body>
+    <header>
+      <nav class="wrap" aria-label="Primary navigation">
+        <a class="brand" href="./">Semantic Python</a>
+        <div class="nav-links">
+          <a href="./comparisons/jev-laya-semantic-python/">Comparison</a>
+          <a href="https://pypi.org/project/semantic-python/">PyPI</a>
+          <a href="https://github.com/SaiRiteshThela/semantic-python">GitHub</a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <section class="hero wrap">
+        <p class="eyebrow">Experimental Python library</p>
+        <h1>Python, but <code>==</code> can understand meaning.</h1>
+        <p class="lede">
+          Semantic Python is an opt-in value layer that turns backend inference
+          into inspectable decisions. Ordinary Python stays deterministic; only
+          explicitly wrapped <code>Semantic(...)</code> values can invoke a model.
+        </p>
+        <div class="actions">
+          <a class="button" href="./comparisons/jev-laya-semantic-python/">Compare Jev, Laya, and Semantic Python</a>
+          <a class="button secondary" href="https://github.com/SaiRiteshThela/semantic-python#install">Install from PyPI</a>
+        </div>
+      </section>
+      <section class="wrap">
+        <pre><code>from semantic_python import Semantic
+
+message = Semantic("I'm done")
+
+if message == "the user wants to stop":
+    exit()</code></pre>
+      </section>
+      <section class="wrap">
+        <div class="grid">
+          <article class="card">
+            <p class="label">Explicit boundary</p>
+            <h2>Normal Python remains normal</h2>
+            <p>Plain strings keep literal equality. Model-backed judgment begins only after explicit wrapping.</p>
+          </article>
+          <article class="card">
+            <p class="label">Inspectable</p>
+            <h2>More than a Boolean</h2>
+            <p>Every decision retains probability, backend and model provenance, proposition, and a state digest.</p>
+          </article>
+          <article class="card">
+            <p class="label">Backend-neutral</p>
+            <h2>Local, hosted, or fake</h2>
+            <p>Use Laya locally, OpenAI remotely, or the deterministic fake backend for offline tests.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="wrap">Semantic Python is experimental software. Model probability is an estimate, not truth or authorization.</div>
+    </footer>
+  </body>
+</html>

@@ -10,6 +10,8 @@ Semantic Python is not a model like Laya or Jev. It is an opt-in Python value
 layer that turns backend inference into inspectable decisions for normal Python
 control flow. Only `Semantic(...)` values can invoke a model.
 
+[Compare Jev, Laya, JevLang, and Semantic Python](https://sairiteshthela.github.io/semantic-python/comparisons/jev-laya-semantic-python/)
+
 ## Install
 
 ```bash
@@ -151,6 +153,10 @@ Application code stays the same when the configured backend changes.
 
 OpenAI receives the wrapped state and proposition. Laya may download model
 checkpoints on first use. FakeBackend performs no network requests.
+
+Jev is a hosted decision model/API, Laya is an open-weights decision engine,
+and Semantic Python is the Python value layer around explicitly selected
+backends. Jev integration is roadmap research and is not currently implemented.
 
 ## Semantics
 
